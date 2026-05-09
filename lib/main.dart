@@ -6,6 +6,7 @@ import 'blocs/catalog/catalog_bloc.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/catalog_repository.dart';
 import 'ui/screens/login_screen.dart';
+import 'ui/screens/splash_screen.dart';
 import 'utils/service_locator.dart';
 
 void main() {
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
           fontFamily: 'Inter',
         ),
-        home: const LoginScreen(),
+        home: const SplashScreen(),
       ),
     );
   }
