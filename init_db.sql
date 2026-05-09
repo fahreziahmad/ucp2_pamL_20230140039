@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS driveease_db;
-USE driveease_db;
+CREATE DATABASE IF NOT EXISTS ucp2paml_db;
+USE ucp2paml_db;
 
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
