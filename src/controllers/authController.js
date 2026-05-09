@@ -1,6 +1,7 @@
 const db = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const response = require('../utils/responseHelper');
 require('dotenv').config();
 
 exports.register = async (req, res) => {
@@ -13,12 +14,12 @@ exports.register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
 
-        res.status(201).json({ message: 'User registered successfully' });
+        response.success(res, null, 'User registered successfully', 201);
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
-            return res.status(400).json({ message: 'Username already exists' });
+            return response.error(res, 'Username already exists', 400);
         }
-        res.status(500).json({ message: 'Error registering user', error: error.message });
+        response.error(res, 'Error registering user: ' + error.message);
     }
 };
 
@@ -35,7 +36,7 @@ exports.login = async (req, res) => {
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return response.error(res, 'Invalid credentials', 401);
         }
 
         const token = jwt.sign(
@@ -44,11 +45,11 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
-        res.json({
+        response.success(res, {
             token,
             user: { id: user.id, username: user.username, role: user.role }
-        });
+        }, 'Login successful');
     } catch (error) {
-        res.status(500).json({ message: 'Error logging in', error: error.message });
+        response.error(res, 'Error logging in: ' + error.message);
     }
 };
