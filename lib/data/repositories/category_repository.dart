@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../models/category_model.dart';
 import '../providers/api_provider.dart';
 
