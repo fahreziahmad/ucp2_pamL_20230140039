@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../models/car_model.dart';
 import '../providers/api_provider.dart';
 
