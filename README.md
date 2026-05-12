@@ -37,5 +37,4 @@ MotoEase Flutter adalah aplikasi mobile untuk manajemen katalog dan armada motor
 *   `lib/data/`: Model data dan Repository untuk akses API.
 *   `lib/ui/`: Semua tampilan layar (screens) dan widget kustom.
 
----
-*Proyek ini dikembangkan sebagai bagian dari Ujian Praktikum Pemrograman Aplikasi Mobile Lanjut.*
+
