@@ -1,49 +1,50 @@
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user_model.dart';
-import '../providers/api_provider.dart';
+import '../../core/services/api_service.dart';
 
 class AuthRepository {
-  final ApiProvider apiProvider;
+  final ApiService apiService;
 
-  AuthRepository({required this.apiProvider});
+  AuthRepository({required this.apiService});
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
-      final response = await apiProvider.dio.post('/auth/login', data: {
+      final response = await apiService.dio.post('/auth/login', data: {
         'username': username,
         'password': password,
       });
-
-      if (response.data['status'] == 'success') {
-        final token = response.data['data']['token'];
-        final userData = response.data['data']['user'];
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', token);
-        
-        return {
-          'user': UserModel.fromJson(userData),
-          'token': token,
-        };
-      } else {
-        throw Exception(response.data['message']);
+      
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
       }
+      throw Exception('Format data login salah');
+    } on DioException catch (e) {
+      final message = e.response?.data != null && e.response?.data['message'] != null
+          ? e.response?.data['message']
+          : 'Login gagal: ${e.message}';
+      throw Exception(message);
     } catch (e) {
-      if (e is DioException) {
-        throw Exception(e.response?.data['message'] ?? 'Login failed');
-      }
-      rethrow;
+      throw Exception('Terjadi kesalahan: $e');
     }
   }
 
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('token');
-  }
-
-  Future<bool> isLoggedIn() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey('token');
+  Future<Map<String, dynamic>> register(String username, String password) async {
+    try {
+      final response = await apiService.dio.post('/auth/register', data: {
+        'username': username,
+        'password': password,
+      });
+      
+      if (response.data != null && response.data['data'] != null) {
+        return Map<String, dynamic>.from(response.data['data']);
+      }
+      throw Exception('Format data registrasi salah');
+    } on DioException catch (e) {
+      final message = e.response?.data != null && e.response?.data['message'] != null
+          ? e.response?.data['message']
+          : 'Registrasi gagal: ${e.message}';
+      throw Exception(message);
+    } catch (e) {
+      throw Exception('Terjadi kesalahan: $e');
+    }
   }
 }
