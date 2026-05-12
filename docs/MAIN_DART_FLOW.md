@@ -1,21 +1,31 @@
-# MotoEase main.dart Flow Documentation
-Dokumen ini menjelaskan alur awal aplikasi saat pertama kali dijalankan.
+# App Startup & Main Flow Logic
 
-## Peran main.dart
-`main.dart` adalah pusat inisialisasi aplikasi. Di sini kita menyiapkan pondasi utama:
-1. **TokenStorage**: Dibuat untuk mengelola session login user.
-2. **ApiService**: Komponen utama komunikasi data yang memerlukan `TokenStorage` untuk otorisasi request.
-3. **Service Locator**: Menyiapkan dependency injection (GetIt) agar repository, service, dan storage mudah dipanggil di mana saja.
-4. **State Management**: Memasang `MultiBlocProvider` agar Auth, Catalog, dan Category BLoC siap digunakan.
+Dokumen ini menjelaskan apa yang terjadi di balik layar saat aplikasi MotoEase pertama kali dijalankan.
 
-## Alur Booting
-1. **WidgetsFlutterBinding**: Menyiapkan engine Flutter agar bisa menjalankan fungsi async sebelum `runApp`.
-2. **setupLocator()**: Mendaftarkan `TokenStorage`, `ApiService`, dan semua `Repository` ke dalam Service Locator (GetIt).
-3. **MultiBlocProvider**:
-   * `AuthBloc`: Mengambil instance `TokenStorage` dan menjalankan event `AppStarted` untuk cek apakah user masih login.
-   * `CatalogBloc` & `CategoryBloc`: Disiapkan dengan repository masing-masing.
-4. **MaterialApp**: Menentukan tema global dan membuka `SplashScreen`.
+## 1. Bootstrapping (main.dart)
+Saat fungsi `main()` dijalankan:
+1.  **Service Initialization**: Aplikasi menyiapkan `TokenStorage` (untuk baca kunci login) dan `ApiService` (untuk koneksi internet).
+2.  **Dependency Injection**: Seluruh Repository (Auth, Catalog, Category) didaftarkan agar bisa dipakai oleh BLoC.
+3.  **Bloc Creation**: BLoC utama dibuat dan langsung mulai mendengarkan perintah dari UI.
 
-## Alur Dependency
-**Screen/BLoC** -> **Repository** -> **ApiService** -> **Backend API**.
-Dengan alur ini, kode menjadi rapi karena masing-masing file punya tanggung jawab yang spesifik.
+## 2. Authentication Check (App Startup)
+Segera setelah aplikasi menyala, **AuthBloc** menjalankan event `AppStarted`:
+*   Aplikasi mengecek ke `TokenStorage`: *"Apakah user ini punya kunci login yang valid?"*
+*   **Jika ADA**: Status berubah menjadi `Authenticated`, dan user langsung diarahkan ke **HomeScreen (Katalog)**.
+*   **Jika TIDAK ADA**: Status menjadi `Unauthenticated`, dan user diarahkan ke halaman **Login**.
+
+## 3. Data Loading Flow
+Di dalam halaman Katalog (`HomeScreen`):
+1.  UI mengirim perintah `FetchCatalog`.
+2.  **CatalogBloc** memanggil `CatalogRepository`.
+3.  `CatalogRepository` memanggil API melalui `ApiService`.
+4.  `ApiService` secara otomatis menempelkan **JWT Token** di header.
+5.  Server mengirim data JSON motor.
+6.  BLoC mengubah data JSON menjadi `MotorModel` dan mengirimkannya kembali ke UI untuk ditampilkan.
+
+## 4. CRUD Lifecycle
+*   **Create/Update**: User mengisi form -> Kirim data + foto -> BLoC kirim ke API -> API balas sukses -> BLoC memerintahkan Katalog untuk refresh otomatis.
+*   **Delete**: User klik hapus -> Konfirmasi dialog -> API hapus data -> Katalog otomatis terupdate tanpa perlu tarik layar manual.
+
+---
+**Key Highlight**: Alur ini memastikan bahwa tidak ada data yang bisa diakses tanpa melalui pengecekan token JWT di `ApiService`.
