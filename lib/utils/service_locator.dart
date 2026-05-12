@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
-import '../data/providers/api_provider.dart';
+import '../core/services/api_service.dart';
+import '../core/services/token_storage.dart';
 import '../data/repositories/auth_repository.dart';
 import '../data/repositories/catalog_repository.dart';
 import '../data/repositories/category_repository.dart';
@@ -7,17 +8,20 @@ import '../data/repositories/category_repository.dart';
 final locator = GetIt.instance;
 
 void setupLocator() {
-  // Providers
-  locator.registerLazySingleton<ApiProvider>(() => ApiProvider());
+  // Services
+  locator.registerLazySingleton<TokenStorage>(() => TokenStorage());
+  locator.registerLazySingleton<ApiService>(
+    () => ApiService(tokenStorage: locator<TokenStorage>()),
+  );
 
   // Repositories
   locator.registerLazySingleton<AuthRepository>(
-    () => AuthRepository(apiProvider: locator<ApiProvider>()),
+    () => AuthRepository(apiService: locator<ApiService>()),
   );
   locator.registerLazySingleton<CatalogRepository>(
-    () => CatalogRepository(apiProvider: locator<ApiProvider>()),
+    () => CatalogRepository(apiService: locator<ApiService>()),
   );
   locator.registerLazySingleton<CategoryRepository>(
-    () => CategoryRepository(apiProvider: locator<ApiProvider>()),
+    () => CategoryRepository(apiService: locator<ApiService>()),
   );
 }

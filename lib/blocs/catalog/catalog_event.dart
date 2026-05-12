@@ -1,35 +1,36 @@
 import 'package:equatable/equatable.dart';
-import '../../data/models/car_model.dart';
+import '../../data/models/motor_model.dart';
 
 abstract class CatalogEvent extends Equatable {
   const CatalogEvent();
-
   @override
   List<Object?> get props => [];
 }
 
-class FetchCatalog extends CatalogEvent {}
-
-class AddCar extends CatalogEvent {
-  final CarModel car;
-  const AddCar(this.car);
-
+class FetchCatalog extends CatalogEvent {
+  final String? search;
+  const FetchCatalog({this.search});
   @override
-  List<Object?> get props => [car];
+  List<Object?> get props => [search];
 }
 
-class UpdateCar extends CatalogEvent {
-  final CarModel car;
-  const UpdateCar(this.car);
-
+class AddMotor extends CatalogEvent {
+  final MotorModel motor;
+  const AddMotor(this.motor);
   @override
-  List<Object?> get props => [car];
+  List<Object?> get props => [motor];
 }
 
-class DeleteCar extends CatalogEvent {
+class UpdateMotor extends CatalogEvent {
+  final MotorModel motor;
+  const UpdateMotor(this.motor);
+  @override
+  List<Object?> get props => [motor];
+}
+
+class DeleteMotor extends CatalogEvent {
   final int id;
-  const DeleteCar(this.id);
-
+  const DeleteMotor(this.id); // Constructor satu argumen posisi
   @override
   List<Object?> get props => [id];
 }

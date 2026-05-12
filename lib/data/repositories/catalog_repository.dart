@@ -1,42 +1,47 @@
-import '../models/car_model.dart';
-import '../providers/api_provider.dart';
+import '../../core/services/api_service.dart';
+import '../models/motor_model.dart';
 
 class CatalogRepository {
-  final ApiProvider apiProvider;
+  final ApiService apiService;
 
-  CatalogRepository({required this.apiProvider});
+  CatalogRepository({required this.apiService});
 
-  Future<List<CarModel>> getAllCars() async {
+  Future<List<MotorModel>> getAllMotors({String? search}) async {
     try {
-      final response = await apiProvider.dio.get('/catalog');
-      final List data = response.data;
-      return data.map((json) => CarModel.fromJson(json)).toList();
+      final response = await apiService.dio.get(
+        '/catalog',
+        queryParameters: search != null ? {'search': search} : null,
+      );
+      
+      // Mengambil data dari properti 'data' karena backend menggunakan responseHelper
+      final List dynamicList = response.data['data'];
+      return dynamicList.map((json) => MotorModel.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to load catalog');
+      throw Exception('Failed to load motors: $e');
     }
   }
 
-  Future<void> createCar(CarModel car) async {
+  Future<void> addMotor(MotorModel motor) async {
     try {
-      await apiProvider.dio.post('/catalog', data: car.toJson());
+      await apiService.dio.post('/catalog', data: motor.toJson());
     } catch (e) {
-      throw Exception('Failed to create car entry');
+      throw Exception('Failed to add motor: $e');
     }
   }
 
-  Future<void> updateCar(CarModel car) async {
+  Future<void> updateMotor(MotorModel motor) async {
     try {
-      await apiProvider.dio.put('/catalog/${car.id}', data: car.toJson());
+      await apiService.dio.put('/catalog/${motor.id}', data: motor.toJson());
     } catch (e) {
-      throw Exception('Failed to update car entry');
+      throw Exception('Failed to update motor: $e');
     }
   }
 
-  Future<void> deleteCar(int id) async {
+  Future<void> deleteMotor(int id) async {
     try {
-      await apiProvider.dio.delete('/catalog/$id');
+      await apiService.dio.delete('/catalog/$id');
     } catch (e) {
-      throw Exception('Failed to delete car entry');
+      throw Exception('Failed to delete motor: $e');
     }
   }
 }

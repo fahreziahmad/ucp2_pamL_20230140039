@@ -1,29 +1,34 @@
+import '../../core/services/api_service.dart';
 import '../models/category_model.dart';
-import '../providers/api_provider.dart';
 
 class CategoryRepository {
-  final ApiProvider apiProvider;
+  final ApiService apiService;
 
-  CategoryRepository({required this.apiProvider});
+  CategoryRepository({required this.apiService});
 
   Future<List<CategoryModel>> getAllCategories() async {
     try {
-      final response = await apiProvider.dio.get('/categories');
-      final List data = response.data;
-      return data.map((json) => CategoryModel.fromJson(json)).toList();
+      final response = await apiService.dio.get('/categories');
+      final List dynamicList = response.data['data'];
+      return dynamicList.map((json) => CategoryModel.fromJson(json)).toList();
     } catch (e) {
-      throw Exception('Failed to load categories');
+      throw Exception('Failed to load categories: $e');
     }
   }
 
-  Future<void> createCategory(String name, String? description) async {
+  Future<void> addCategory(String name, String description) async {
     try {
-      await apiProvider.dio.post('/categories', data: {
-        'name': name,
-        'description': description,
-      });
+      await apiService.dio.post('/categories', data: {'name': name, 'description': description});
     } catch (e) {
-      throw Exception('Failed to create category');
+      throw Exception('Failed to add category: $e');
+    }
+  }
+
+  Future<void> deleteCategory(int id) async {
+    try {
+      await apiService.dio.delete('/categories/$id');
+    } catch (e) {
+      throw Exception('Failed to delete category: $e');
     }
   }
 }
