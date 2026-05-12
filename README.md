@@ -30,6 +30,32 @@ MotoEase Flutter adalah aplikasi mobile untuk manajemen katalog dan armada motor
 *   **Local Storage**: SharedPreferences
 *   **Image Picker**: Untuk akses kamera dan galeri foto.
 
+## State Management
+
+Aplikasi ini sepenuhnya menggunakan **BLoC (Business Logic Component)** untuk memisahkan logika bisnis dari tampilan (UI):
+
+*   **AuthBloc**: Mengatur alur *Splash token check*, login, register, dan logout.
+*   **CatalogBloc**: Mengatur *load catalog*, pencarian (search), create, update, delete, upload image, hingga sinkronisasi data katalog.
+*   **CategoryBloc**: Mengatur manajemen kategori (load, create, dan delete kategori).
+
+**Alur Data**:
+1.  **UI** tidak memanggil API secara langsung, melainkan mengirim **Event** ke BLoC.
+2.  **BLoC** memproses logika dan memanggil **Repository**.
+3.  **Repository** berkomunikasi dengan backend melalui **ApiService**.
+4.  Hasilnya dikembalikan ke UI dalam bentuk **State** (Loading, Success, Empty, atau Error).
+
+4.  Hasilnya dikembalikan ke UI dalam bentuk **State** (Loading, Success, Empty, atau Error).
+
+## Alur Aplikasi
+
+1.  **Start Up**: User membuka aplikasi, Splash screen mengecek token lokal di penyimpanan HP.
+2.  **Auth Check**: Jika belum login, user diarahkan ke halaman Login/Register. Jika sudah login, langsung masuk ke Katalog.
+3.  **Authentication**: Setelah pendaftaran sukses, user diminta login manual. Token dari login sukses disimpan otomatis.
+4.  **Data Fetching**: Halaman utama (Catalog) mengambil data motor secara real-time dari backend.
+5.  **Navigasi**: User berpindah antara tab **Katalog Motor** dan **Manajemen Kategori** melalui Bottom Navigation.
+6.  **Manajemen Data**: User dapat melakukan pencarian, melihat detail, menambah, mengubah, hingga menghapus data motor dan kategori.
+7.  **Token Security**: Jika kunci login (token) kedaluwarsa atau tidak valid, server akan menolak akses data dan aplikasi otomatis mengarahkan user untuk login ulang demi keamanan.
+
 ## Struktur Proyek
 
 *   `lib/blocs/`: Manajemen state aplikasi.
