@@ -1,40 +1,49 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../data/repositories/auth_repository.dart';
+import '../../core/services/token_storage.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
+  final TokenStorage tokenStorage;
 
-  AuthBloc({required this.authRepository}) : super(AuthInitial()) {
-    on<AppStarted>(_onAppStarted);
-    on<LoginRequested>(_onLoginRequested);
-    on<LogoutRequested>(_onLogoutRequested);
-  }
+  AuthBloc({required this.authRepository, required this.tokenStorage}) : super(AuthInitial()) {
+    on<AppStarted>((event, emit) async {
+      final token = await tokenStorage.getToken();
+      final username = await tokenStorage.getUsername();
+      if (token != null && username != null) {
+        emit(AuthAuthenticated(username));
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    });
 
-  Future<void> _onAppStarted(AppStarted event, Emitter<AuthState> emit) async {
-    final isLoggedIn = await authRepository.isLoggedIn();
-    if (isLoggedIn) {
-      // In a real app, you'd fetch the user profile here
-      // For now, we'll just emit Unauthenticated to force login or handle profile fetch
-      emit(Unauthenticated());
-    } else {
-      emit(Unauthenticated());
-    }
-  }
+    on<LoginRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        final result = await authRepository.login(event.username, event.password);
+        await tokenStorage.saveToken(result['token'], event.username);
+        emit(AuthAuthenticated(event.username));
+      } catch (e) {
+        emit(AuthError(e.toString()));
+      }
+    });
 
-  Future<void> _onLoginRequested(LoginRequested event, Emitter<AuthState> emit) async {
-    emit(AuthLoading());
-    try {
-      final result = await authRepository.login(event.username, event.password);
-      emit(Authenticated(result['user']));
-    } catch (e) {
-      emit(AuthFailure(e.toString()));
-    }
-  }
+    on<RegisterRequested>((event, emit) async {
+      emit(AuthLoading());
+      try {
+        // Hanya mendaftar saja, tidak menyimpan token
+        await authRepository.register(event.username, event.password);
+        emit(AuthRegisterSuccess()); // Emit status baru: Sukses Daftar
+      } catch (e) {
+        emit(AuthError(e.toString()));
+      }
+    });
 
-  Future<void> _onLogoutRequested(LogoutRequested event, Emitter<AuthState> emit) async {
-    await authRepository.logout();
-    emit(Unauthenticated());
+    on<LogoutRequested>((event, emit) async {
+      await tokenStorage.clear();
+      emit(AuthUnauthenticated());
+    });
   }
 }
