@@ -4,7 +4,6 @@ import 'blocs/auth/auth_bloc.dart';
 import 'blocs/auth/auth_event.dart';
 import 'blocs/catalog/catalog_bloc.dart';
 import 'blocs/category/category_bloc.dart';
-import 'blocs/category/category_event.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/catalog_repository.dart';
 import 'data/repositories/category_repository.dart';

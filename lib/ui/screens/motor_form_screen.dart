@@ -5,8 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import '../../blocs/catalog/catalog_bloc.dart';
 import '../../blocs/catalog/catalog_event.dart';
 import '../../blocs/category/category_bloc.dart';
-import '../../blocs/category/category_event.dart';
-import '../../blocs/category/category_state.dart';
 import '../../data/models/motor_model.dart';
 
 class MotorFormScreen extends StatefulWidget {
