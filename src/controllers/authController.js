@@ -12,9 +12,23 @@ exports.register = async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-        await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+        const [result] = await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+        
+        // Ambil ID user yang baru saja dibuat
+        const userId = result.insertId;
 
-        response.success(res, null, 'User registered successfully', 201);
+        // Buat token agar user bisa langsung login setelah daftar
+        const token = jwt.sign(
+            { id: userId, username },
+            process.env.JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+
+        response.success(res, {
+            token,
+            user: { id: userId, username }
+        }, 'User registered successfully', 201);
+        
     } catch (error) {
         if (error.code === 'ER_DUP_ENTRY') {
             return response.error(res, 'Username already exists', 400);
@@ -29,7 +43,7 @@ exports.login = async (req, res) => {
         const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
 
         if (rows.length === 0) {
-            return res.status(401).json({ message: 'Invalid credentials' });
+            return response.error(res, 'Invalid credentials', 401);
         }
 
         const user = rows[0];
@@ -40,14 +54,14 @@ exports.login = async (req, res) => {
         }
 
         const token = jwt.sign(
-            { id: user.id, username: user.username, role: user.role },
+            { id: user.id, username: user.username },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
         response.success(res, {
             token,
-            user: { id: user.id, username: user.username, role: user.role }
+            user: { id: user.id, username: user.username }
         }, 'Login successful');
     } catch (error) {
         response.error(res, 'Error logging in: ' + error.message);

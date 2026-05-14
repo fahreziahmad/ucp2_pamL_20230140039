@@ -22,7 +22,7 @@ app.use('/api/catalog', catalogRoutes);
 
 // Health check
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to DriveEase API' });
+    res.json({ message: 'Welcome to MotoEase API' });
 });
 
 // Error handling middleware
@@ -32,5 +32,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`MotoEase Server is running on port ${PORT}`);
 });
